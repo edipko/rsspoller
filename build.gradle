@@ -1,0 +1,105 @@
+buildscript {      // Configuration for building
+    repositories {
+        jcenter()      // Bintray's repository - a fast Maven Central mirror & more
+        mavenCentral()
+    }
+    dependencies {
+        //classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.+' // Latest 1.x.x release
+       // classpath 'org.akhikhl.gretty:gretty:+'
+        //classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
+    }
+}
+
+repositories {   // repositories for JARs you access in your code
+    maven {
+        url 'https://maven-central.storage.googleapis.com'             // Google's mirror of Maven Central
+    }
+    jcenter()
+    mavenCentral()
+}
+
+apply plugin: 'java'
+//apply plugin: 'war'
+//apply plugin: 'org.akhikhl.gretty'
+//apply plugin: 'com.google.cloud.tools.appengine'
+
+
+group 'com.spotonresponse.bigdata'
+version '1.0.0.0'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'FetchRSS',
+                'Implementation-Version': version,
+                'Main-Class': 'com.spotonresponse.bigdata.FetchRSS',
+                'Sealed': 'true'
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+
+//apply plugin: "io.spring.dependency-management"
+
+ext {
+    springBootVersion = '1.2.5.RELEASE'
+}
+
+//dependencyManagement {
+//    imports {
+//        mavenBom 'com.amazonaws:aws-java-sdk-bom:1.11.228'
+//    }
+//}
+
+
+dependencies {
+    //testCompile group: 'junit', name: 'junit', version: '4.12'
+    //providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
+    //providedCompile 'com.google.appengine:appengine:+'
+
+    // Log4j
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
+
+    // https://mvnrepository.com/artifact/org.json/json
+    compile group: 'org.json', name: 'json', version: '20180130'
+
+    // AWS components
+    // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-core
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-core', version: '1.11.410'
+
+    // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-dynamodb
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.410'
+
+    //compile "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    //compile 'org.socialsignin:spring-data-dynamodb:1.0.2.RELEASE'
+
+
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+
+
+}
+
+/*
+gretty {
+    httpPort = 8080
+    contextPath = '/'
+    servletContainer = 'jetty9'  // What App Engine Flexible uses
+}
+
+appengine {
+
+    deploy {   // deploy configuration
+        stopPreviousVersion = true  // default - stop the current version
+        promote = true              // default - & make this the current version
+    }
+}
+*/
+
+
+
