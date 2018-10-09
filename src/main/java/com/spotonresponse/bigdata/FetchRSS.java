@@ -20,13 +20,12 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.*;
+
 
 public class FetchRSS {
 
@@ -41,17 +40,6 @@ public class FetchRSS {
     private static String DynamoDBTableName;
     private static String RssUrl;
 
-
-    static void WriteFile(String xmlString) {
-        try {
-            FileWriter fw = new FileWriter(new File("file1.txt"));
-            fw.write(xmlString);
-            fw.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 
     private static void processRss() throws IOException {
@@ -84,6 +72,15 @@ public class FetchRSS {
             while (itemIterator.hasNext()) {
                 JSONObject itemAll = (JSONObject) itemIterator.next();
                 if (itemAll.get("status").equals("Closed")) {
+
+                    JSONObject where = itemAll.getJSONObject("where");
+                    JSONObject point = where.getJSONObject("Point");
+                    String pos = point.getString("pos");
+                    String[] loc = pos.split(" ");
+                    String latitude = loc[1];
+                    String longitude = loc[2];
+
+                    //GeoDataManager geoDataManager = // Instantiate GeoDataManager
 
                     // Make sure every key has a value
                     JSONObject item = XMLUtils.removeEmptyKeyValuePair(itemAll);
