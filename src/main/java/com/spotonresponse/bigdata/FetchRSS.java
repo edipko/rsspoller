@@ -73,7 +73,7 @@ public class FetchRSS {
                 JSONObject itemAll = (JSONObject) itemIterator.next();
                 if (itemAll.get("status").equals("Closed")) {
 
-                    JSONObject where = itemAll.getJSONObject("where");
+                  /*  JSONObject where = itemAll.getJSONObject("where");
                     JSONObject point = where.getJSONObject("Point");
                     String pos = point.getString("pos");
                     String[] loc = pos.split(" ");
@@ -81,6 +81,7 @@ public class FetchRSS {
                     String longitude = loc[2];
 
                     //GeoDataManager geoDataManager = // Instantiate GeoDataManager
+*/
 
                     // Make sure every key has a value
                     JSONObject item = XMLUtils.removeEmptyKeyValuePair(itemAll);
@@ -215,16 +216,20 @@ public class FetchRSS {
 
     public static Map<String, String> getDBKeys() {
 
-        logger.debug("Loading keys from DB...");
+        logger.debug("Loading ALL keys from DB...");
         Map<String, String> currentItems = new HashMap<String, String>();
-        ScanRequest scanRequest = new ScanRequest()
-                .withTableName(DynamoDBTableName);
-        ScanResult result = client.scan(scanRequest);
-        for (Map<String, AttributeValue> item : result.getItems()) {
-            currentItems.put(item.get("title").getS(), item.get("md5hash").getS());
-        }
+        ScanResult result = null;
+        do {
+            ScanRequest scanRequest = new ScanRequest()
+                    .withTableName(DynamoDBTableName);
 
-        logger.debug("...Done");
+            result = client.scan(scanRequest);
+            for (Map<String, AttributeValue> item : result.getItems()) {
+                currentItems.put(item.get("title").getS(), item.get("md5hash").getS());
+            }
+
+            logger.debug("...Done");
+        } while (result.getLastEvaluatedKey() != null);
 
         return currentItems;
     }
