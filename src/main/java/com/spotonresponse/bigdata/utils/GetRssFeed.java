@@ -1,5 +1,6 @@
 package com.spotonresponse.bigdata.utils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -21,10 +22,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -36,8 +34,58 @@ public class GetRssFeed {
     private static ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 
 
+    private static final String STYLESHEET_NAME = "stylesheet.xslt";
+
     public GetRssFeed() {
 
+    }
+
+
+    public static JSONObject getFeed2(File url) {
+
+        String xmlString = "";
+
+        try {
+            XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+            // Setup a new eventReader
+            logger.debug("Opening input stream: " + url.toString());
+
+            InputStream in = new FileInputStream(url);
+            XMLStreamReader streamReader = inputFactory.createXMLStreamReader(in);
+
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            StringWriter stringWriter = new StringWriter();
+            transformer.transform(new StAXSource(streamReader), new StreamResult(stringWriter));
+
+            xmlString = stringWriter.toString();
+            logger.debug("Got XML as string:" + xmlString);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (XMLStreamException e) {
+            e.printStackTrace();
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
+
+        return XML.toJSONObject(xmlString);
+
+    }
+
+    private static String cleanTextContent(String text)
+    {
+        // strips off all non-ASCII characters
+        text = text.replaceAll("[^\\x00-\\x7F]", "");
+
+        // erases all the ASCII control characters
+        text = text.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "");
+
+        // removes non-printable characters from Unicode
+        text = text.replaceAll("\\p{C}", "");
+
+        return text.trim();
     }
 
 
@@ -54,13 +102,12 @@ public class GetRssFeed {
             XMLStreamReader streamReader = inputFactory.createXMLStreamReader(in);
 
             logger.debug("Opening stylesheet");
-            InputStream phonestyle_is = classloader.getResourceAsStream("stylesheet.xslt");
-            StreamSource stylesource = new StreamSource(phonestyle_is);
+            InputStream jSONstyle_is = classloader.getResourceAsStream(STYLESHEET_NAME);
+            StreamSource stylesource = new StreamSource(jSONstyle_is);
 
 
             logger.debug("Applying Stylesheet");
             TransformerFactory tfactory = TransformerFactory.newInstance();
-            //Transformer transformer = tfactory.newTransformer();
             Transformer transformer = tfactory.newTransformer(stylesource);
             StringWriter stringWriter = new StringWriter();
             transformer.transform(new StAXSource(streamReader), new StreamResult(stringWriter));
@@ -99,7 +146,7 @@ public class GetRssFeed {
             Document doc = builder.parse(xmlStream);
             xmlStream.close();
 
-            InputStream phonestyle_is = classloader.getResourceAsStream("stylesheet.xslt");
+            InputStream phonestyle_is = classloader.getResourceAsStream(STYLESHEET_NAME);
             StreamSource stylesource = new StreamSource(phonestyle_is);
 
             TransformerFactory tfactory = TransformerFactory.newInstance();
@@ -137,7 +184,7 @@ public class GetRssFeed {
             XMLStreamReader streamReader = inputFactory.createXMLStreamReader(in);
 
             logger.debug("Opening stylesheet");
-            InputStream phonestyle_is = classloader.getResourceAsStream("stylesheet.xslt");
+            InputStream phonestyle_is = classloader.getResourceAsStream(STYLESHEET_NAME);
             StreamSource stylesource = new StreamSource(phonestyle_is);
 
 

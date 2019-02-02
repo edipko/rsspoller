@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Implementation-Title: FetchRSS
+Implementation-Version: 1.2.0.0
+Sealed: true
+Main-Class: com.spotonresponse.bigdata.FetchRSS
+
